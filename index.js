@@ -67,11 +67,10 @@ User.put('/users/:phoneNumber', async (ctx, next) => {
     const {db, params, request: {body}} = ctx
 
     const filter = {
-        phoneNumber: params.phoneNumber.startsWith('+') ? params.phoneNumber : `+${params.phoneNumber}`
+        phoneNumber: params.phoneNumber
     }
 
-
-    const result = await db.collection(process.env.DB_COLLECTION_USER).findOneAndReplace(filter, body)
+    const result = await db.collection(process.env.DB_COLLECTION_USER).findOneAndReplace(filter, {...body, phoneNumber: params.phoneNumber })
 
     if (result.ok) {
         ctx.status = 200
@@ -119,5 +118,5 @@ User.del('/users/:phoneNumber', async (ctx, next) => {
 
 app.use(User.routes())
 
-app.listen(3000)
+app.listen(2222)
 
