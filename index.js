@@ -6,6 +6,7 @@ import Mongo from 'mongodb'
 
 import User from './User.js'
 import Page from './Page.js'
+import Post from './Post.js'
 
 env.config()
 
@@ -25,6 +26,7 @@ app.use(async (ctx, next) => {
 
 app.use(User.routes())
 app.use(Page.routes())
+app.use(Post.routes())
 
 app.listen(2222)
 
