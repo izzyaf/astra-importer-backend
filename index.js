@@ -70,7 +70,7 @@ User.put('/users/:phoneNumber', async (ctx, next) => {
         phoneNumber: params.phoneNumber
     }
 
-    const result = await db.collection(process.env.DB_COLLECTION_USER).findOneAndReplace(filter, {...body, phoneNumber: params.phoneNumber })
+    const result = await db.collection(process.env.DB_COLLECTION_USER).findOneAndReplace(filter, {...body, phoneNumber: params.phoneNumber }, { returnOriginal: false })
 
     if (result.ok) {
         ctx.status = 200
