@@ -13,11 +13,11 @@ Post.post('/posts', async (ctx, next) => {
         sharingTo,
         rating = 3.3,
         mediaIds,
-        owner,
-        pageId
+        postedBy,
+        postedIn
     } = body
 
-    const foundUser = await db.collection(process.env.DB_COLLECTION_USER).find({ _id: Mongo.ObjectId(owner) }).toArray()
+    const foundUser = await db.collection(process.env.DB_COLLECTION_USER).find({ _id: Mongo.ObjectId(postedBy) }).toArray()
 
     if (foundUser.length === 0) {
         ctx.status = 403
@@ -30,8 +30,8 @@ Post.post('/posts', async (ctx, next) => {
         return next()
     }
 
-    if (pageId) {
-        const foundPage = await db.collection(process.env.DB_COLLECTION_PAGE).find({ _id: Mongo.ObjectId(pageId) }).toArray()
+    if (postedIn) {
+        const foundPage = await db.collection(process.env.DB_COLLECTION_PAGE).find({ _id: Mongo.ObjectId(postedIn) }).toArray()
 
         if (foundPage.length === 0) {
             ctx.status = 403
@@ -53,8 +53,8 @@ Post.post('/posts', async (ctx, next) => {
             sharingTo,
             rating,
             mediaIds,
-            owner,
-            pageId
+            owner: postedBy,
+            pageId: postedIn
         })
 
         if (result.insertedCount === 1) {
@@ -88,7 +88,7 @@ Post.get('/posts', async (ctx, next) => {
 Post.put('/posts/:id', async (ctx, next) => {
     const { db, params, request: { body } } = ctx
 
-    const foundUser = await db.collection(process.env.DB_COLLECTION_USER).find({ _id: Mongo.ObjectId(body.owner) }).toArray()
+    const foundUser = await db.collection(process.env.DB_COLLECTION_USER).find({ _id: Mongo.ObjectId(body.postedBy) }).toArray()
 
     if (foundUser.length === 0) {
         ctx.status = 403
@@ -101,8 +101,8 @@ Post.put('/posts/:id', async (ctx, next) => {
         return next()
     }
 
-    if (body.pageId) {
-        const foundPage = await db.collection(process.env.DB_COLLECTION_PAGE).find({ _id: Mongo.ObjectId(body.pageId) }).toArray()
+    if (body.postedIn) {
+        const foundPage = await db.collection(process.env.DB_COLLECTION_PAGE).find({ _id: Mongo.ObjectId(body.postedIn) }).toArray()
 
         if (foundPage.length === 0) {
             ctx.status = 403
