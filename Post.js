@@ -12,7 +12,8 @@ Post.post('/posts', async (ctx, next) => {
         content,
         sharingTo,
         rating = 3.3,
-        mediaIds,
+        videos,
+        photos,
         postedBy,
         postedIn
     } = body
@@ -52,9 +53,10 @@ Post.post('/posts', async (ctx, next) => {
             content,
             sharingTo,
             rating,
-            mediaIds,
-            owner: postedBy,
-            pageId: postedIn
+            videos,
+            photos,
+            postedBy,
+            postedIn
         })
 
         if (result.insertedCount === 1) {
