@@ -4,7 +4,10 @@ import Mongo from 'mongodb'
 const Post = new Router()
 
 Post.post('/posts', async (ctx, next) => {
-    const { request: { body }, db } = ctx
+    const {
+        request: { body },
+        db
+    } = ctx
 
     const {
         type,
@@ -15,10 +18,14 @@ Post.post('/posts', async (ctx, next) => {
         videos,
         photos,
         postedBy,
-        postedIn
+        postedIn,
+        place
     } = body
 
-    const foundUser = await db.collection(process.env.DB_COLLECTION_USER).find({ _id: Mongo.ObjectId(postedBy) }).toArray()
+    const foundUser = await db
+        .collection(process.env.DB_COLLECTION_USER)
+        .find({ _id: Mongo.ObjectId(postedBy) })
+        .toArray()
 
     if (foundUser.length === 0) {
         ctx.status = 403
@@ -32,7 +39,10 @@ Post.post('/posts', async (ctx, next) => {
     }
 
     if (postedIn) {
-        const foundPage = await db.collection(process.env.DB_COLLECTION_PAGE).find({ _id: Mongo.ObjectId(postedIn) }).toArray()
+        const foundPage = await db
+            .collection(process.env.DB_COLLECTION_PAGE)
+            .find({ _id: Mongo.ObjectId(postedIn) })
+            .toArray()
 
         if (foundPage.length === 0) {
             ctx.status = 403
@@ -47,17 +57,20 @@ Post.post('/posts', async (ctx, next) => {
     }
 
     try {
-        const result = await db.collection(process.env.DB_COLLECTION_POST).insertOne({
-            type,
-            title,
-            content,
-            sharingTo,
-            rating,
-            videos,
-            photos,
-            postedBy,
-            postedIn
-        })
+        const result = await db
+            .collection(process.env.DB_COLLECTION_POST)
+            .insertOne({
+                type,
+                title,
+                content,
+                sharingTo,
+                rating,
+                videos,
+                photos,
+                postedBy,
+                postedIn,
+                place
+            })
 
         if (result.insertedCount === 1) {
             ctx.status = 200
@@ -79,7 +92,10 @@ Post.post('/posts', async (ctx, next) => {
 
 Post.get('/posts', async (ctx, next) => {
     const { db } = ctx
-    const result = await db.collection(process.env.DB_COLLECTION_POST).find().toArray()
+    const result = await db
+        .collection(process.env.DB_COLLECTION_POST)
+        .find()
+        .toArray()
 
     ctx.status = 200
     ctx.body = { data: result }
@@ -88,9 +104,16 @@ Post.get('/posts', async (ctx, next) => {
 })
 
 Post.put('/posts/:id', async (ctx, next) => {
-    const { db, params, request: { body } } = ctx
+    const {
+        db,
+        params,
+        request: { body }
+    } = ctx
 
-    const foundUser = await db.collection(process.env.DB_COLLECTION_USER).find({ _id: Mongo.ObjectId(body.postedBy) }).toArray()
+    const foundUser = await db
+        .collection(process.env.DB_COLLECTION_USER)
+        .find({ _id: Mongo.ObjectId(body.postedBy) })
+        .toArray()
 
     if (foundUser.length === 0) {
         ctx.status = 403
@@ -104,7 +127,10 @@ Post.put('/posts/:id', async (ctx, next) => {
     }
 
     if (body.postedIn) {
-        const foundPage = await db.collection(process.env.DB_COLLECTION_PAGE).find({ _id: Mongo.ObjectId(body.postedIn) }).toArray()
+        const foundPage = await db
+            .collection(process.env.DB_COLLECTION_PAGE)
+            .find({ _id: Mongo.ObjectId(body.postedIn) })
+            .toArray()
 
         if (foundPage.length === 0) {
             ctx.status = 403
@@ -122,9 +148,11 @@ Post.put('/posts/:id', async (ctx, next) => {
         _id: Mongo.ObjectId(params.id)
     }
 
-    const result = await db.collection(process.env.DB_COLLECTION_POST).findOneAndReplace(filter, {
-        ...body
-    })
+    const result = await db
+        .collection(process.env.DB_COLLECTION_POST)
+        .findOneAndReplace(filter, {
+            ...body
+        })
 
     if (result.ok) {
         ctx.status = 200
@@ -150,7 +178,9 @@ Post.del('/posts/:id', async (ctx, next) => {
         _id: Mongo.ObjectId(params.id)
     }
 
-    const result = await db.collection(process.env.DB_COLLECTION_POST).findOneAndDelete(filter)
+    const result = await db
+        .collection(process.env.DB_COLLECTION_POST)
+        .findOneAndDelete(filter)
 
     if (result.ok) {
         ctx.status = 204

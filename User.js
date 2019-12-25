@@ -17,7 +17,8 @@ User.post('/users', async (ctx, next) => {
                 dateOfBirth: body.dateOfBirth,
                 countryCode: body.countryCode || 'VN',
                 password: body.password,
-                phoneNumber: body.phoneNumber
+                phoneNumber: body.phoneNumber,
+                avatar: body.avatar,
             })
 
         if (result.insertedCount === 1) {
