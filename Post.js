@@ -14,12 +14,13 @@ Post.post('/posts', async (ctx, next) => {
         title,
         content,
         sharingTo,
-        rating = 3.3,
         videos,
         photos,
         postedBy,
         postedIn,
-        place
+        place,
+        rating,
+        ratingDetails
     } = body
 
     const foundUser = await db
@@ -64,12 +65,13 @@ Post.post('/posts', async (ctx, next) => {
                 title,
                 content,
                 sharingTo,
-                rating,
                 videos,
                 photos,
                 postedBy,
                 postedIn,
-                place
+                place,
+                rating,
+                ratingDetails
             })
 
         if (result.insertedCount === 1) {
@@ -91,10 +93,24 @@ Post.post('/posts', async (ctx, next) => {
 })
 
 Post.get('/posts', async (ctx, next) => {
-    const { db } = ctx
+    const {
+        db,
+        request: { query }
+    } = ctx
+
+    const filter = {}
+
+    if (query.of === 'user') {
+        filter.postedIn = { $eq: null }
+    }
+
+    if (query.of === 'page') {
+        filter.postedIn = { $ne: null }
+    }
+
     const result = await db
         .collection(process.env.DB_COLLECTION_POST)
-        .find()
+        .find(filter)
         .toArray()
 
     ctx.status = 200
