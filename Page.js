@@ -4,11 +4,17 @@ import Mongo from 'mongodb'
 const Page = new Router()
 
 Page.post('/pages', async (ctx, next) => {
-    const { request: { body }, db } = ctx
+    const {
+        request: { body },
+        db
+    } = ctx
 
     const { owner, name, type, businessType } = body
 
-    const foundUser = await db.collection(process.env.DB_COLLECTION_USER).find({ _id: Mongo.ObjectId(owner) }).toArray()
+    const foundUser = await db
+        .collection(process.env.DB_COLLECTION_USER)
+        .find({ _id: Mongo.ObjectId(owner) })
+        .toArray()
 
     if (foundUser.length === 0) {
         ctx.status = 403
@@ -22,12 +28,14 @@ Page.post('/pages', async (ctx, next) => {
     }
 
     try {
-        const result = await db.collection(process.env.DB_COLLECTION_PAGE).insertOne({
-            owner,
-            name,
-            type,
-            businessType
-        })
+        const result = await db
+            .collection(process.env.DB_COLLECTION_PAGE)
+            .insertOne({
+                owner,
+                name,
+                type,
+                businessType
+            })
 
         if (result.insertedCount === 1) {
             ctx.status = 200
@@ -49,7 +57,10 @@ Page.post('/pages', async (ctx, next) => {
 
 Page.get('/pages', async (ctx, next) => {
     const { db } = ctx
-    const result = await db.collection(process.env.DB_COLLECTION_PAGE).find().toArray()
+    const result = await db
+        .collection(process.env.DB_COLLECTION_PAGE)
+        .find()
+        .toArray()
 
     ctx.status = 200
     ctx.body = { data: result }
@@ -58,9 +69,16 @@ Page.get('/pages', async (ctx, next) => {
 })
 
 Page.put('/pages/:id', async (ctx, next) => {
-    const { db, params, request: { body } } = ctx
+    const {
+        db,
+        params,
+        request: { body }
+    } = ctx
 
-    const foundUser = await db.collection(process.env.DB_COLLECTION_USER).find({ _id: Mongo.ObjectId(body.owner) }).toArray()
+    const foundUser = await db
+        .collection(process.env.DB_COLLECTION_USER)
+        .find({ _id: Mongo.ObjectId(body.owner) })
+        .toArray()
 
     if (foundUser.length === 0) {
         ctx.status = 403
@@ -77,9 +95,17 @@ Page.put('/pages/:id', async (ctx, next) => {
         _id: Mongo.ObjectId(params.id)
     }
 
-    const result = await db.collection(process.env.DB_COLLECTION_PAGE).findOneAndReplace(filter, {
-        ...body
-    })
+    const result = await db
+        .collection(process.env.DB_COLLECTION_PAGE)
+        .findOneAndReplace(
+            filter,
+            {
+                ...body
+            },
+            {
+                returnOriginal: false
+            }
+        )
 
     if (result.ok) {
         ctx.status = 200
@@ -105,7 +131,9 @@ Page.del('/pages/:id', async (ctx, next) => {
         _id: Mongo.ObjectId(params.id)
     }
 
-    const result = await db.collection(process.env.DB_COLLECTION_PAGE).findOneAndDelete(filter)
+    const result = await db
+        .collection(process.env.DB_COLLECTION_PAGE)
+        .findOneAndDelete(filter)
 
     if (result.ok) {
         ctx.status = 204

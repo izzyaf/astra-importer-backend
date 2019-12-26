@@ -166,9 +166,15 @@ Post.put('/posts/:id', async (ctx, next) => {
 
     const result = await db
         .collection(process.env.DB_COLLECTION_POST)
-        .findOneAndReplace(filter, {
-            ...body
-        })
+        .findOneAndReplace(
+            filter,
+            {
+                ...body
+            },
+            {
+                returnOriginal: false
+            }
+        )
 
     if (result.ok) {
         ctx.status = 200
