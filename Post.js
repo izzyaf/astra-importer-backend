@@ -1,5 +1,30 @@
 import Router from '@koa/router'
 import Mongo from 'mongodb'
+import fetch from 'node-fetch'
+import sizeOf from 'image-size'
+
+export const getImageDimensions = async uri => {
+    let response
+
+    try {
+        response = await fetch(
+            encodeURI(uri),
+            {
+                method: 'GET'
+            }
+        )
+    } catch (_) {
+        return null
+    }
+
+    if (response.status !== 200) {
+        return null
+    }
+
+    const buffer = await response.arrayBuffer()
+
+    return sizeOf(Buffer.from(buffer))
+}
 
 const Post = new Router()
 
@@ -57,6 +82,27 @@ Post.post('/posts', async (ctx, next) => {
         }
     }
 
+    let photosWithMeta = []
+
+    if (Array.isArray(photos)) {
+        photosWithMeta = await Promise.all(photos.map(async uri => {
+            const obj = {
+                uri
+            }
+
+            try {
+                const metadata = await getImageDimensions(uri)
+
+                return {
+                    ...obj,
+                    ...metadata
+                }
+            } catch (e) {
+                return obj
+            }
+        }))
+    }
+
     try {
         const result = await db
             .collection(process.env.DB_COLLECTION_POST)
@@ -66,7 +112,7 @@ Post.post('/posts', async (ctx, next) => {
                 content,
                 sharingTo,
                 videos,
-                photos,
+                photos: photosWithMeta,
                 postedBy,
                 postedIn,
                 place,
@@ -112,6 +158,48 @@ Post.get('/posts', async (ctx, next) => {
         .collection(process.env.DB_COLLECTION_POST)
         .find(filter)
         .toArray()
+
+    // await Promise.all(result.map(async res => {
+    //     if (res.photos) {
+    //         res.photos = await Promise.all(res.photos.map(async element => {
+    //             if (typeof element === 'string') {
+    //                 const obj = {}
+    //
+    //                 if (element.startsWith('http://') || element.startsWith('https://')) {
+    //                     obj.uri = element
+    //                 } else {
+    //                     obj.uri = `http://${element}`
+    //                 }
+    //
+    //                 const image = await getImageDimensions(element).catch(() => null)
+    //
+    //                 if (image === null) {
+    //                     return obj
+    //                 }
+    //
+    //                 return {
+    //                     ...obj,
+    //                     ...image
+    //                 }
+    //             }
+    //
+    //             return element
+    //         }))
+    //     }
+
+//     return db
+//         .collection(process.env.DB_COLLECTION_POST)
+//         .findOneAndReplace(
+//             { _id: Mongo.ObjectId(res._id) },
+//             {
+//                 ...res
+//             },
+//             {
+//                 returnOriginal: false
+//             }
+//         )
+// })
+// )
 
     ctx.status = 200
     ctx.body = { data: result }
